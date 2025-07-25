@@ -93,6 +93,40 @@ conda activate IPK-tritex
 > 
 > _R scripts were originally intended to be run in RStudio. However, this may not be convenient when working on remote servers (via SSH), where graphical interfaces are unavailable. All custom R scripts have been adapted to run in the command line using `Rscript`. Feel free to adapt them back to RStudio if you prefer working in that environment._
 
+> **NOTE 2**  
+> _These are the **recommended software versions** for the TRITEX pipeline, as suggested by the authors:_
+>
+> **Tools**
+>
+> - [Z shell, v5.0.2](http://zsh.sourceforge.net/)  
+> - [GNU Parallel, v20150222](https://www.gnu.org/software/parallel/)  
+> - [Hifiasm, v0.15.1-r334](https://hifiasm.readthedocs.io/)  
+> - [gfatools, v0.5](https://github.com/lh3/gfatools)  
+> - [SAMtools, v1.9](https://github.com/samtools/samtools)  
+> - [bgzip & tabix (via BCFtools), v1.9](https://github.com/samtools/bcftools)  
+> - [Seqtk, v1.0-r76](https://github.com/lh3/seqtk)  
+> - [Bedtools, v2.26.0](https://github.com/arq5x/bedtools2)  
+> - [R, v3.5.1](https://www.r-project.org/)  
+> - [Pigz (parallel gzip), v2.3.4](https://zlib.net/pigz/)  
+> - [Minimap2, v2.14](https://github.com/lh3/minimap2)  
+> - [Cutadapt, v1.15](https://cutadapt.readthedocs.io/en/stable/guide.html)  
+> - [EMBOSS, v6.6.0](http://emboss.sourceforge.net/)  
+> - [BBMap, v37.93](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbmap-guide/)  
+> - [faToTwoBit & twoBitInfo (UCSC tools), v3.69](http://hgdownload.cse.ucsc.edu/admin/exe/)  
+>
+> _If you don't have access to the commercial **NovoSort**, you can follow the alternative SAMtools-based approach provided in the [TRITEX shell scripts](https://bitbucket.org/tritexassembly/tritexassembly.bitbucket.io/src/master/shell/)._
+>
+> ---
+>
+> **Required R Libraries**
+>
+> - [`data.table`, v1.11.8](https://cran.r-project.org/web/packages/data.table/index.html)  
+> - [`stringi`, v1.2.4](https://cran.r-project.org/web/packages/stringi/index.html)  
+> - [`igraph`, v1.2.2](https://cran.r-project.org/web/packages/igraph/index.html)  
+> - [`zoo`, v1.8-3](https://cran.r-project.org/web/packages/zoo/index.html)  
+> - [`parallel`](https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf) (_included in R-core ≥ 2.14_)  
+
+
 ______________________________________________________________________________
 
 ## Split Hi-Fi data
