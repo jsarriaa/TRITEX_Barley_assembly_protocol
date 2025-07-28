@@ -143,8 +143,10 @@ You may have the Hi-Fi data in a ```.bam``` file instead of a compressed ```.fas
  ## Edit variables on the script
 ./01_bam2fastq.sh
 ```
+## Contigs building
 
 Using Hifiasm build contigs from the Hi-Fi.
+
 Set up properly the directory and variables and run:
 ```
 ./02_contig_assembly.sh
@@ -154,6 +156,7 @@ Check and generate your contigs stats, runnning:
 ./03_check_contig_stats.sh
 ```
 It will outcome files summarizing the generated contigs from hifiasm, and the uncontigs ones as well.
+
 Interesting data, as the N50, N90, mean and contig size can be extracted from it.
 
 Then, transform de gfa file into fasta format, also seting contigs names:
@@ -166,9 +169,114 @@ ______________________________________________________________________________
 ## Map HiC data
 
 First, you need to digest in silico the hifiasm assembly with the restriction enzyme used for the preparation of the Hi-C libraries.
+
 At the following script remember to properly indicate which enzyme has been used to prepare your library.
 ```
 ./05_digest_enzyme_HiC.sh
 ```
-Take care about the script at ```bitbucket/shell/digest_emboss.zsh```. You may have to change the paths for your exectuables, such as restrict, bedtools and rebase.
+> Take care about the script at ```bitbucket/shell/digest_emboss.zsh```. You may have to change the paths for your exectuables, such as restrict, bedtools and rebase.
+
+Now, map the HiC data. Ensure at the script set up the variables, enzyme used, and executables paths. Output will be stored at ```mapping``` folder.
+```
+./06_HiC_mapping.sh
+```
+
+______________________________________________________________________________
+
+## Creating the guide map table
+
+From a reference genome, create a guide map table. Take a look with calm to the [TRITEX guide map documentation](https://tritexassembly.bitbucket.io/#_creating_the_guide_map_table) to understand the database.
+
+Obtain from a reference genome a single copy 100bp regions. In this case, barley, we are using MorexV3. 
+
+```bitbucket/miscellaneous/mask_assembly.zsh``` script requires to change the paths to the executables.
+
+Also remember to change at ```07_prepare_reference.sh``` your own paths and variables and run:
+```
+./07_prepare_reference.sh
+```
+After masking, prepare the guide map. Take a look and set up the variables, and prepare the output files names.
+```
+./08_guide_map_create.R
+```
+
+### Mapping the guide map sequences to the genome
+
+Modify with your variables and run:
+```
+./09_map_guide_map.sh
+```
+
+From now on work will be mainly performed at R. You must start creating the assembly object as and R database (remember to set variables before running):
+```
+Rscript 10_create_assembly_object.R
+```
+All ouptuts from now on will be located at ```/pseudomolecules``` folder. Future steps will generate more databases. It is recomended to name databases to be able to distingish (for instance, adding the date).
+
+## Breaking chimeric scaffold
+
+By mistake scaffolds wrongly constructed may appear (in example, sequences from diference chromosomes but a similar region might be combined together, and must be corrected manually).
+
+For this, generate diagnostic plots:
+```
+Rscript 11_break_chimeric_scaffold.R
+```
+It generate plots for all contigs of more than 1 Mb (do not forget to change variables).
+
+The curation step must be performed by you manually. Take a carefully view to the generated pdf. You should find chimeras such as pages 3, 6 and 9 of this [example](https://bitbucket.org/tritexassembly/tritexassembly.bitbucket.io/raw/9375957ff5f1763b1ce11d090919a76de9d7bf7a/example_assembly_1Mb.pdf).
+
+Then, specify the bin positions in where the chimeras have to be broken. Do it editing the script ```12_fix_chimeras_scaffold.R```. Modify the variable ```i``` as the page you found an chimera, and and set and estimated range where you observe the chimera. Add as many times you need this block of code. Once you have all ready, run:
+```
+Rscript 12_fix_chimeras_scaffold.R
+```
+Now, you will have a new assembly object. Check at the new pdf produced that now the chimeric scaffolds are now properly divided, and carry on:
+
+## Make HiC contact matrix
+Prepare the variables at the file and run the script:
+```
+Rscript 13_make_HiC_matrix.R
+```
+Check the produced pdfs and excel sheet.
+
+If everything is allright, carry on.  Let's do a second round of looking to chimeras. Now, decreasing down to at least 500kb scaffolds. Prepare and run the script to first fixing chimeras, or plotting specific scaffolds:
+```
+Rscript 14_second_round_scaffold.R
+```
+Then: (remember to use the new updated database, and set up variables)
+```
+Rscript 15_500kb_scaffolds.R
+```
+
+## Colinear plot
+
+This step is not mandatory but recomended. Looks for collinearities between the scaffolds, helping to spot inverted or missplaced things. Pay attention at the number of chromosomes that your species have.
+Once set everything up, run:
+```
+Rscript 16_collinear_plot.R
+```
+
+## Manual scaffold curation: Map Inspector Shiny
+> IMPORTANT NOTE: Those following scripts have not been tested. Use on your own knowledge. Recomended trying to follow the original TRITEX guide.
+
+At the colinear plots you can observe inverted scaffolds, like at this [example](https://bitbucket.org/tritexassembly/tritexassembly.bitbucket.io/raw/9375957ff5f1763b1ce11d090919a76de9d7bf7a/manual_curation.jpg). 
+
+When you spot one of this scaffolds to be corrected, go to the assembly excel file (produced at steps as the 15 script) and modify the ```new orientation``` value for the scaffold.
+
+You can try to run ```17.05_MapInspectorShiny.R``` and ```17_MapInspectorShiny.R``` with ```Rscript``` but note I have not tested them properly, because Map Inspector Shiny can not be installed with the specifications provided by the pipeline documentation. Try it on your own if you consider.
+
+## Compile pseudomolecules
+> Note: at scripts I indicate you should work with the corrected database by Map shiny inspector if you have, if not (as me) work with the obtained after the script nº15.
+
+First, lets get some data from the outcome pseudomolecules. Prepare the script with the variables (look over the script that you have to specify the number of chr of your species):
+```
+Rscript 18_pseudomol_stats.R
+```
+And compile it:
+> Same, set uo variables and work over the corrected database
+You must prperly modify the file: ```/tritexassembly.bitbucket.io/R/pseudomolecule_construction.R``` and edit the ```compile_psmol``` function with the proper paths as variables.
+```
+Rscript 19_compile_pseudomol.R
+```
+> NOTE: take a lot of care about the executable version of samtools. It is different (and must be) than last versions and the recomended one.
+> It worked for me installing samtools version 1.21 in another path different and used it at this step, while the rest of the pipeline only worked for me at version 1.22.
 
