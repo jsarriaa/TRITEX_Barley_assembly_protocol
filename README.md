@@ -25,7 +25,6 @@ tritex_barley_assembly/
 ├── 04_gfa2fa.sh
 ├── 05_digest_enzyme_HiC.sh
 ├── 06_HiC_mapping.sh
-├── 06.log
 ├── 07_prepare_reference.sh
 ├── 08_guide_map_create.R
 ├── 09_map_guide_map.sh
