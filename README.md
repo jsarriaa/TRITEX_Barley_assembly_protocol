@@ -65,7 +65,7 @@ IPK/
 └── Hi-Fi/
     └── Gm84096_250523_032626_s1.hifi_reads.bam                
 ```
-> _**Note: you may have the Hi-Fi data in fastq format to. This is allright too**_
+> _**Note: you may have the Hi-Fi data in fastq format. This is allright too**_
 
 Download as well the reference genome in the main folder, MorexV3 in this case for barley.
 
@@ -128,6 +128,13 @@ conda activate IPK-tritex
 
 ______________________________________________________________________________
 
+## Transform Hi-Fi format (if needed)
+You may have the Hi-Fi data in a ```.bam``` file instead of a compressed ```.fastq```. Run this script to addapt the data for TRITEX protocol:
+```
+ ## Edit variables on the script
+./01_bam2fastq.sh
+```
+
 ## Split Hi-Fi data
 
 Hi-Fi is heavy, and split it make the scaffold building easier and more optimal. Run:
@@ -136,12 +143,6 @@ Hi-Fi is heavy, and split it make the scaffold building easier and more optimal.
 ```
 It is prepaired to split the file into 20 parts. Edit line ```parts=20``` if you desire.
 
-## Transform Hi-Fi format (if needed)
-You may have the Hi-Fi data in a ```.bam``` file instead of a compressed ```.fastq```. Run this script to addapt the data for TRITEX protocol:
-```
- ## Edit variables on the script
-./01_bam2fastq.sh
-```
 ## Contigs building
 
 Using Hifiasm build contigs from the Hi-Fi.
@@ -206,7 +207,7 @@ Modify with your variables and run:
 ./09_map_guide_map.sh
 ```
 
-From now on work will be mainly performed at R. You must start creating the assembly object as and R database (remember to set variables before running):
+From now on, work will be mainly performed at R. You must start creating the assembly object as an R database (remember to set variables before running):
 ```
 Rscript 10_create_assembly_object.R
 ```
@@ -256,6 +257,7 @@ Rscript 16_collinear_plot.R
 
 ## Manual scaffold curation: Map Inspector Shiny
 > IMPORTANT NOTE: Those following scripts have not been tested. Use on your own knowledge. Recomended trying to follow the original TRITEX guide.
+> Download and use Shiny, you can follow this [manual](https://www.linode.com/docs/guides/how-to-deploy-rshiny-server-on-ubuntu-and-debian/) recomended by TRITEX pipeline.
 
 At the colinear plots you can observe inverted scaffolds, like at this [example](https://bitbucket.org/tritexassembly/tritexassembly.bitbucket.io/raw/9375957ff5f1763b1ce11d090919a76de9d7bf7a/manual_curation.jpg). 
 
