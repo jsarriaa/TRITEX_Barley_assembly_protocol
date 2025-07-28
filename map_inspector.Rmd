@@ -1,0 +1,331 @@
+---
+title: "Hi-C map inspector"
+runtime: shiny
+output: html_document
+---
+
+<style>
+body {
+    position: absolute;
+    left: 0px;}
+</style>
+
+```{r, echo=FALSE}
+
+print("You are inside the Shiny app for Hi-C map inspection.")
+
+# Set paths to R libraries
+#.libPaths("/scratch/software-phgv2/miniconda3/envs/IPK-tritex/lib/R/library")
+
+print("Setted R library paths")
+#print(.libPaths())
+
+# Path to the the folder with RDS file for Hi-C map object (absolute or 
+# relative to the Shiny root)
+# Path to the folder with RDS files for Hi-C map object (pseudomolecule folder)
+dir <- "/scratch/GDB136/IPK/pseudomolecules"
+print(paste0("Setted directory to ", dir))
+
+# Default object to load
+def <- 'hic_map_v2_500kb'
+print(paste0("Default object to load: ", def))
+
+print("Loading required libraries...")
+print("Loading; shiny")
+library(shiny)
+print("Loading; data.table")
+library(data.table)
+
+ncol <- 100
+colorRampPalette(c("white", "red"))(ncol)->whitered
+
+plot_inversions<-function(ratio, agp, selchr, startpos, endpos, boundaries){
+ par(mar=c(5,5,1,1))
+ limits <- c(startpos, endpos)
+ ratio[agp_chr == selchr, plot(bin/1e6, r, pch=20, las=1, xlim=limits, bty='l', ylab="r", xlab="genomic position (Mb)")]
+ if(boundaries){
+  agp[gap == T & agp_chr == selchr, abline(lwd=1, col='gray', v=(agp_start+agp_end)/2e6)]
+ }
+}
+
+contact_matrix<-function(links, agp, chr, binsize, startpos, endpos, boundaries=T, grid=NULL, trafo=NULL){
+ agp[chr, on="agp_chr"]->a
+ #limits <- c(0, max(a$agp_end)/1e6)
+ limits <- c(startpos, endpos)
+ links[chr, on="agp_chr"][, l := log10(nlinks_norm)][]->z
+ z[, col := whitered[cut(l, ncol, labels=F)]]
+ z[bin1/1e6 >= startpos & bin1/1e6 <= endpos & bin2/1e6 <= endpos & bin2/1e6 >= startpos]->z
+
+ par(mar=c(5,5,1,1))
+ z[, plot(0, las=1, type='n', bty='l', xlim=limits, ylim=limits, xlab="position (Mb)", ylab="position (Mb)")]
+ z[, rect((bin1-binsize)/1e6, (bin2-binsize)/1e6, bin1/1e6, bin2/1e6, col=col, border=NA)]
+ if(!is.null(grid)){
+  abline(v=seq(0, limits[2], grid), col="blue", lty=2)
+ }
+
+ if(endpos - startpos <= 100){
+  lwd=3
+ } else{
+  lwd=1
+ }
+ 
+ if(boundaries){
+  a[gap == T, abline(lwd=lwd, col='darkgray', v=(agp_start+agp_end)/2e6)]
+  a[gap == T, abline(lwd=lwd, col='darkgray', h=(agp_start+agp_end)/2e6)]
+ }
+}
+
+shinyApp(
+ options = list(height = 2500, width=1000),
+
+ ui=fluidPage(
+
+  fluidRow(
+   column(width=5, htmlOutput("selectPath"),
+	  checkboxInput("boundaries", "Scaffold boundaries", TRUE)
+	  ),
+   column(width=5, htmlOutput("selectChr"), numericInput("startpos", 
+  "Start position (Mb)", -1), numericInput("endpos", "End position 
+  (Mb)", -1)
+	  )
+  ),
+
+  fluidRow(
+   column(width=5, 
+    h5("Map summary"),
+    verbatimTextOutput("all_summary")),
+   column(width=6, 
+    h5("Map summary (selected chromosome)"),
+    verbatimTextOutput("chr_summary"))
+  ),
+
+  tabsetPanel(
+   tabPanel("Contact matrix", fluidPage(
+    helpText("Click on the plot to find scaffolds."),
+    plotOutput("matrix", height = "700px", width="700px", click = "matrix_click"),
+    fluidRow(column(width=10, verbatimTextOutput("matrix_info")))
+   )),
+   tabPanel("Asymmetry plot", fluidPage(
+    helpText("Click on the plot to find scaffolds."),
+    plotOutput("asymmetry", height = "400px", width="960px", click = "asymmetry_click"),
+    fluidRow(column(width=10, verbatimTextOutput("asymmetry_info")))
+   )),
+   tabPanel("AGP", fluidPage(uiOutput("tableRow"))),
+   tabPanel("chrUn", fluidPage(uiOutput("unRow"))),
+   tabPanel("POPSEQ", fluidPage( helpText("This plot requires the 'popseq_chr' column in the AGP object."), plotOutput(height="600px", width="600px", "popseq")))
+  )
+ ),
+
+ server=function(input, output, session) {
+
+  sel_map <- reactive({
+   p <- paste(sep=".", input$path, "Rds")
+   readRDS(paste0(dir, "/", p))->hic_map
+   hic_map$agp[agp_chr != "chrUn"]->a
+   agp_chrs <- sort(unique(a$agp_chr))
+   # This assumes that you don't have more nine chromosomes per homeologous group
+   agp_chrs[order(substr(agp_chrs,5,5))] -> hic_map$agp_chrs
+   #updateSelectInput(session, "chr", selected=hic_map$agp_chrs[1])
+   hic_map
+  })
+
+  sel_chr<-reactive({
+   hic_map <- sel_map()
+   sort(hic_map$agp_chrs)[1] -> sel_chr
+   if(!is.null(input$chr)){
+    if(input$chr %in% hic_map$agp_chrs){
+     sel_chr <- input$chr
+    }
+   }
+   hic_map$agp[agp_chr == sel_chr]->a
+   round(sum(as.numeric(a$scaffold_length))/1e6, 1) -> len
+   updateSelectInput(session, "chr", selected=sel_chr)
+   updateNumericInput(session, "startpos", value=0)
+   updateNumericInput(session, "endpos", value=len)
+   list(chr=sel_chr, len=len)
+  })
+
+  sel_interval<-reactive({
+   len <- sel_chr()$len
+   if(is.na(input$endpos) | input$endpos >= len | input$endpos <= -1){
+     updateNumericInput(session, "endpos", value=len)
+   }
+   if(is.na(input$startpos) | input$startpos < 0){
+    updateNumericInput(session, "startpos", value=0)
+   }
+   cat(stderr(), paste0("selint", "\n")) 
+   cat(stderr(), paste0(input$start, "\n")) 
+   cat(stderr(), paste0(input$end, "\n")) 
+   list(start=input$startpos, end=input$endpos)
+  })
+
+  output$tableRow <- renderUI({
+   verticalLayout(DT::dataTableOutput("table", width = "940px"))
+  })
+
+  output$unRow <- renderUI({
+   verticalLayout(DT::dataTableOutput("untable", width = "940px"))
+  })
+
+  output$untable <- DT::renderDataTable({
+    validate(need(!is.null(input$path), ""))
+    m <- sel_map()$agp
+    if(!"popseq_chr" %in% names(m)){
+     m[agp_chr == "chrUn" &  gap == F,
+                  .(scaffold, start=agp_start, end=agp_end, 
+		    length=scaffold_length)]
+    } else {
+     m[agp_chr == "chrUn" &  gap == F,
+                  .(scaffold, start=agp_start, end=agp_end, 
+		    length=scaffold_length, 
+		    popseq_chr,
+		    cM=round(popseq_cM,1))]
+    }
+   },
+   filter="top",
+   rownames=F,
+   options = list(
+     autoWidth = TRUE,
+     lengthMenu = c(20, 50, 100, -1), pageLength=50
+   )
+  )
+
+  output$table <- DT::renderDataTable({
+    validate(need(!is.null(input$path), ""))
+    m <- sel_map()$agp
+    sel_chr <- sel_chr()$chr
+    sel_interval <- sel_interval()
+    if(!"popseq_chr" %in% names(m)){
+     m[agp_chr == sel_chr & agp_end/1e6 >= sel_interval$start & agp_start/1e6 <= sel_interval$end &  gap == F,
+                  .(scaffold, start=agp_start, end=agp_end, 
+		    orientation=as.factor(orientation), 
+		    length=scaffold_length, bin=hic_bin, 
+		    cM=round(popseq_cM,1))]
+    } else {
+     m[agp_chr == sel_chr & agp_end/1e6 >= sel_interval$start & agp_start/1e6 <= sel_interval$end &  gap == F,
+                  .(scaffold, start=agp_start, end=agp_end, 
+		    orientation=as.factor(orientation), 
+		    length=scaffold_length, bin=hic_bin, 
+		    popseq_chr,
+		    cM=round(popseq_cM,1))]
+    }
+   },
+   filter="top",
+   rownames=F,
+   options = list(
+     autoWidth = TRUE,
+     lengthMenu = c(20, 50, 100, -1), pageLength=50
+   )
+  )
+
+  output$all_summary <- renderText({
+   validate(need(!is.null(input$path), ""))
+   hic_map <- sel_map()
+   hic_map$agp[agp_chr != "chrUn"]->a
+   paste0(
+    "Number of chromosomes: ", length(hic_map$agp_chrs), "\n",
+    "Map length: ", round(sum(as.numeric(a$scaffold_length))/1e9, 1), " Gb\n",
+    "AGP gap length: ", round(sum(as.numeric(a[gap == T]$scaffold_length))/1e6, 1), " Mb\n",
+    "Number of bins: ", nrow(a[gap == F, .N, .(agp_chr, hic_bin)]), "\n",
+    "Number of scaffolds: ", a[gap == F, length(unique(scaffold))], "\n"
+   )
+  })
+
+  output$chr_summary <- renderText({
+   validate(need(!is.null(input$path), ""))
+   hic_map <- sel_map()
+   sel_chr <- sel_chr()$chr
+   hic_map$agp[agp_chr == sel_chr]->a
+   paste0(
+    "Map length: ", round(sum(as.numeric(a$scaffold_length))/1e6, 1), " Mb\n",
+    "AGP gap length: ", round(sum(as.numeric(a[gap == T]$scaffold_length))/1e3, 1), " kb\n",
+    "Number of bins: ", nrow(a[gap == F, .N, .(hic_bin)]), "\n",
+    "Number of scaffolds: ", a[gap == F, length(unique(scaffold))], "\n"
+   )
+  })
+
+  output$selectPath <- renderUI({
+   sub(".Rds", "", grep(value=T, ".Rds$", list.files(dir))) -> f
+   selectInput("path", "Select data set:", f, def)
+  })
+
+  output$popseq <- renderPlot( {
+   a <- sel_map()$agp
+   if("popseq_chr" %in% names(a)){
+    sel_chr <- sel_chr()$chr
+    a[agp_chr == sel_chr & agp_chr == paste0("chr", popseq_chr)]->z
+    par(mar=c(5,5,1,1))
+    par(cex=1.3)
+    z[, plot(las=1, bty='l', xlab="AGP position (Mb)", ylab="POPSEQ position (cM)", (agp_start+agp_end)/2e6, pch=20, popseq_cM)]
+   }
+  })
+  
+
+  output$asymmetry <- renderPlot( {
+   validate(need(!is.null(input$path), ""))
+   validate(need(!is.null(input$startpos), ""))
+   validate(need(input$startpos > -1, ""))
+   validate(need(input$endpos > -1, ""))
+   validate(need(input$startpos != "", ""))
+   validate(need(input$endpos != "", ""))
+
+   sel_map <- sel_map()
+   sel_chr <- sel_chr()$chr
+   sel_interval <- sel_interval()
+   plot_inversions(ratio=sel_map$ratio, agp=sel_map$agp, selchr=sel_chr, sel_interval$start, 
+		   sel_interval$end, input$boundaries)
+  })
+
+  output$matrix <- renderPlot( {
+   validate(need(!is.null(input$path), ""))
+   validate(need(!is.null(input$startpos), ""))
+   validate(need(input$startpos > -1, ""))
+   validate(need(input$endpos > -1, ""))
+   validate(need(input$startpos != "", ""))
+   validate(need(input$endpos != "", ""))
+
+   sel_map <- sel_map()
+   sel_chr <- sel_chr()$chr
+   sel_interval <- sel_interval()
+   contact_matrix(sel_map$links, sel_map$agp, sel_chr, sel_map$binsize, 
+		  sel_interval$start,
+		  sel_interval$end, input$boundaries)
+  })
+
+  output$selectChr <- renderUI({
+   validate(need(!is.null(input$path), ""))
+   sel_map <- sel_map()
+   selectInput("chr", "Select chromosome:", sel_map$agp_chrs)
+  })
+ 
+  output$matrix_info <- renderText({
+   validate(need(!is.null(input$path), ""))
+   sel_map <- sel_map()
+   sel_chr <- sel_chr()$chr
+   if(is.null(input$matrix_click)){
+    return("scaffold (x axis):\nscaffold (y axis):") 
+   }
+   sx <- sel_map$agp[data.table(agp_chr=sel_chr, agp_start=1e6*input$matrix_click$x), roll=T, on=c("agp_chr", "agp_start")]
+   sy <- sel_map$agp[data.table(agp_chr=sel_chr, agp_start=1e6*input$matrix_click$y), roll=T, on=c("agp_chr", "agp_start")]
+   paste0(
+	 "scaffold (x axis): ", sx$scaffold, ", (length: ", round(sx$scaffold_length/1e6, 1), " Mb, Hi-C bin: ", sx$hic_bin, ")", "\n", 
+	 "scaffold (y axis): ", sy$scaffold, ", (length: ", round(sy$scaffold_length/1e6, 1), " Mb, Hi-C bin: ", sy$hic_bin, ")"  
+	)
+  }
+  )
+
+  output$asymmetry_info <- renderText({
+   validate(need(!is.null(input$path), ""))
+   sel_map <- sel_map()
+   sel_chr <- sel_chr()$chr
+   if(is.null(input$asymmetry_click)){
+    s <- ""
+    "scaffold: "
+   } else {
+    res <- sel_map$agp[data.table(agp_chr=sel_chr, agp_start=1e6*input$asymmetry_click$x), roll=T, on=c("agp_chr", "agp_start")]
+    paste0("scaffold: ", res$scaffold, ", (length: ", round(res$scaffold_length/1e6, 1), " Mb, Hi-C bin: ", res$hic_bin, ")")
+   }
+  })
+ })
+
+```
