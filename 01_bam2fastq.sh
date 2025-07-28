@@ -1,5 +1,5 @@
 #  Script to convert BAM files to FASTQ format using samtools (paired-end reads)
-# Usage: ./02_bam2fastq.sh
+# Usage: ./01_bam2fastq.sh
 
 projectdir='/scratch/GDB136/IPK'
 prefix='GDB136'
