@@ -258,12 +258,12 @@ Rscript 16_collinear_plot.R
 
 ## Manual scaffold curation: Map Inspector Shiny
 > IMPORTANT NOTE: Those following scripts have not been tested. Use on your own knowledge. Recomended trying to follow the original TRITEX guide.
-> Download and use Shiny, you can follow this [manual](https://www.linode.com/docs/guides/how-to-deploy-rshiny-server-on-ubuntu-and-debian/) recomended by TRITEX pipeline.
 
 At the colinear plots you can observe inverted scaffolds, like at this [example](https://bitbucket.org/tritexassembly/tritexassembly.bitbucket.io/raw/9375957ff5f1763b1ce11d090919a76de9d7bf7a/manual_curation.jpg). 
 
 When you spot one of this scaffolds to be corrected, go to the assembly excel file (produced at steps as the 15 script) and modify the ```new orientation``` value for the scaffold.
 
+> Download and use Shiny, you can follow this [manual](https://www.linode.com/docs/guides/how-to-deploy-rshiny-server-on-ubuntu-and-debian/) recomended by TRITEX pipeline.
 You can try to run ```17.05_MapInspectorShiny.R``` and ```17_MapInspectorShiny.R``` with ```Rscript``` but note I have not tested them properly, because Map Inspector Shiny can not be installed with the specifications provided by the pipeline documentation. Try it on your own if you consider.
 
 ## Compile pseudomolecules
