@@ -1,0 +1,91 @@
+#!/usr/bin/awk -f
+
+# Calculate summary statistics based sequence lengths. See n50_nice if the row names are too cryptic
+
+BEGIN{
+ OFS="\t"
+}
+
+{
+ t += $2
+ if($2 >= 500){
+  n500++
+  l500 += $2
+  }
+ if($2 >= 1000){
+  n1k++
+  l1k += $2
+  }
+ if($2 >= 5000){
+  n5k++
+  l5k += $2
+ }
+ if($2 >= 10000){
+  n10k++
+  l10k += $2
+ }
+ if($2 >= 50000){
+  n50k++
+  l50k += $2
+ }
+ if($2 >= 100000){
+  n100k++
+  l100k += $2
+ }
+ if($2 >= 500000){
+  n500k++
+  l500k += $2
+ }
+ if($2 >= 1000000){
+  n1000k++
+  l1000k += $2
+ }
+ if($2 >= 10000000){
+  n10000k++
+  l10000k += $2
+ }
+ if($2 >= 100000000){
+  n100000k++
+  l100000k += $2
+ }
+ a[NR] = $2
+ if($2 > maxl){
+  maxl=$2
+  max=$1
+ }
+}
+
+END{
+ asort(a)
+ while(s < 0.5 * t)
+  s += a[++i]
+ s=0
+ while(s < 0.1 * t)
+  s += a[++j]
+ printf "max\t%'d\t%s\n", maxl, max
+ printf "csize:\t%'d\n", t
+ printf "noc\t%'d\n", NR
+ printf "noc500\t%'d\n", n500
+ printf "len500\t%'d\t%.2f\n", l500, l500 / t * 100
+ printf "noc1k\t%'d\n", n1k
+ printf "len1k\t%'d\t%.2f\n", l1k, l1k / t * 100
+ printf "noc5k\t%'d\n", n5k
+ printf "len5k\t%'d\t%.2f\n", l5k, l5k / t * 100
+ printf "noc10k\t%'d\n", n10k
+ printf "len10k\t%'d\t%.2f\n", l10k, l10k / t * 100
+ printf "noc50k\t%'d\n", n50k
+ printf "len50k\t%'d\t%.2f\n", l50k, l50k / t * 100
+ printf "noc100k\t%'d\n", n100k
+ printf "len100k\t%'d\t%.2f\n", l100k, l100k / t * 100
+ printf "noc500k\t%'d\n", n500k
+ printf "len500k\t%'d\t%.2f\n", l500k, l500k / t * 100
+ printf "noc1M\t%'d\n", n1000k
+ printf "len1M\t%'d\t%.2f\n", l1000k, l1000k / t * 100
+ printf "noc10M\t%'d\n", n10000k
+ printf "len10M\t%'d\t%.2f\n", l10000k, l10000k / t * 100
+ printf "noc100M\t%'d\n", n100000k
+ printf "len100M\t%'d\t%.2f\n", l100000k, l100000k / t * 100
+ printf "N50\t%'d\n", a[i]
+ printf "N90\t%'d\n", a[j]
+ printf "mean\t%'.d\n", t/NR
+}

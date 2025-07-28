@@ -1,0 +1,90 @@
+#!/usr/bin/awk -f
+
+# Create nicely formatted summary statistics
+
+BEGIN{
+ OFS="\t"
+ while(getline < ARGV[1]){
+  n++;
+  t += $2
+  if($2 >= 500){
+   n500++
+   l500 += $2
+   }
+  if($2 >= 1000){
+   n1k++
+   l1k += $2
+   }
+  if($2 >= 5000){
+   n5k++
+   l5k += $2
+  }
+  if($2 >= 10000){
+   n10k++
+   l10k += $2
+  }
+  if($2 >= 50000){
+   n50k++
+   l50k += $2
+  }
+  if($2 >= 100000){
+   n100k++
+   l100k += $2
+  }
+  if($2 >= 500000){
+   n500k++
+   l500k += $2
+  }
+  if($2 >= 1000000){
+   n1000k++
+   l1000k += $2
+  }
+  a[n] = $2
+  if($2 > maxl){
+   maxl=$2
+   max=$1
+  }
+ }
+ asort(a)
+ while(s < 0.5 * t)
+  s += a[++i]
+ s=0
+ while(s < 0.1 * t)
+  s += a[++j]
+ printf "assembly size\t%'d", t
+ print " bp"
+ printf "N50\t%'d", a[i] 
+ print " bp"
+ printf "N90\t%'d", a[j]
+ print " bp"
+ printf "mean scaffold size\t%.0f", t/n
+ print " bp"
+ printf "maximum scaffold size\t%'d", maxl
+ print " bp"
+ printf "number of scaffolds\t%'d\n", n
+ printf "number scaffolds >= 500 bp\t%'d\n", n500
+ printf "size of scaffolds >= 500 bp\t%'d", l500
+ print " bp"
+ printf "number of scaffolds >= 1 kb\t%'d\n", n1k
+ printf "size of scaffolds >= 1kb\t%'d", l1k
+ print " bp"
+ printf "number of scaffolds >= 5 kb\t%'d\n", n5k
+ printf "size of scaffolds >= 5 kb\t%'d", l5k
+ print " bp"
+ printf "number of scaffolds >= 10 kb\t%'d\n", n10k
+ printf "size of scaffolds >= 10 kb\t%'d", l10k
+ print " bp"
+ printf "number of scaffolds >= 50 kb\t%'d\n", n50k
+ printf "size of scaffolds >= 50 kb\t%'d", l50k
+ print " bp"
+ printf "number of scaffolds >= 100 kb\t%'d\n", n100k
+ printf "size of scaffolds >= 100 kb\t%'d", l100k
+ print " bp"
+ printf "number of scaffolds >= 500 kb\t%'d\n", n500k
+ printf "size of scaffolds >= 500 kb\t%'d", l500k
+ print " bp"
+ printf "number of scaffolds >= 1 Mb\t%'d\n", n1000k
+ printf "size of scaffolds >= 1 Mb\t%'d", l1000k
+ print " bp"
+ ARGC = 0
+}
