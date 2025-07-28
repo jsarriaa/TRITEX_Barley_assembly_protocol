@@ -124,7 +124,7 @@ conda activate IPK-tritex
 > - [`stringi`, v1.2.4](https://cran.r-project.org/web/packages/stringi/index.html)  
 > - [`igraph`, v1.2.2](https://cran.r-project.org/web/packages/igraph/index.html)  
 > - [`zoo`, v1.8-3](https://cran.r-project.org/web/packages/zoo/index.html)  
-> - [`parallel`](https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf) (_included in R-core ≥ 2.14_)  
+> - [`parallel`](https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf) (_included in R-core ≥ 2.14_)
 
 
 ______________________________________________________________________________
@@ -139,4 +139,36 @@ It is prepaired to split the file into 20 parts. Edit line ```parts=20``` if you
 
 ## Transform Hi-Fi format (if needed)
 You may have the Hi-Fi data in a ```.bam``` file instead of a compressed ```.fastq```. Run this script to addapt the data for TRITEX protocol:
+```
+ ## Edit variables on the script
+./01_bam2fastq.sh
+```
+
+Using Hifiasm build contigs from the Hi-Fi.
+Set up properly the directory and variables and run:
+```
+./02_contig_assembly.sh
+```
+Check and generate your contigs stats, runnning:
+```
+./03_check_contig_stats.sh
+```
+It will outcome files summarizing the generated contigs from hifiasm, and the uncontigs ones as well.
+Interesting data, as the N50, N90, mean and contig size can be extracted from it.
+
+Then, transform de gfa file into fasta format, also seting contigs names:
+```
+./04_gfa2fa.sh
+```
+
+______________________________________________________________________________
+
+## Map HiC data
+
+First, you need to digest in silico the hifiasm assembly with the restriction enzyme used for the preparation of the Hi-C libraries.
+At the following script remember to properly indicate which enzyme has been used to prepare your library.
+```
+./05_digest_enzyme_HiC.sh
+```
+Take care about the script at ```bitbucket/shell/digest_emboss.zsh```. You may have to change the paths for your exectuables, such as restrict, bedtools and rebase.
 
