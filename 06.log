@@ -1,0 +1,347 @@
+nohup: no se tendrá en cuenta la entrada
+Note that you are using a version of TRITEX without private software, so you are avoiding novosort and using an open-source alternative: samtools.
+Debug mode is ON
+Project directory: /scratch/GDB136/IPK
+Project name: GDB136
+Reference FASTA file path: /scratch/GDB136/IPK/assembly/GDB136/GDB136.p_ctg.fa
+Bitbucket path: /scratch/GDB136/IPK/tritexassembly.bitbucket.io
+Mapping script path: /scratch/GDB136/IPK/run_hic_mapping_samtools_joan.sh
+Linker sequence: GATCGATC
+Restriction enzyme: DpnII
+BED file path: /scratch/GDB136/IPK/assembly/GDB136/GDB136_DpnII_fragments_30bp.bed
+Temporary directory: /scratch/GDB136/tmp
+Hi-C directory: /scratch/GDB136/IPK/HiC
+minlen: 30
+Running the command: bash /scratch/GDB136/IPK/run_hic_mapping_samtools_joan.sh /scratch/GDB136/IPK/HiC -threads 64 -mem '200G' -linker GATCGATC -ref /scratch/GDB136/IPK/assembly/GDB136/GDB136.p_ctg.fa -bed /scratch/GDB136/IPK/assembly/GDB136/GDB136_DpnII_fragments_30bp.bed -tmp /scratch/GDB136/tmp -minlen 30 hic
+remember to adjust at the /scratch/GDB136/IPK/run_hic_mapping_samtools_joan.sh script the path to: cutadpt, bgzip, minimap2, novosort, samtools and bedtools
+###################
+# Using the following software paths:
+# Minimap2: /scratch/software-phgv2/miniconda3/envs/IPK-tritex/bin/minimap2
+# Cutadapt: /scratch/software-phgv2/miniconda3/envs/IPK-tritex/bin/cutadapt
+# Samtools: /scratch/software-phgv2/miniconda3/envs/IPK-tritex/bin/samtools
+# Bedtools: /scratch/software-phgv2/miniconda3/envs/IPK-tritex/bin/bedtools
+# Novosort: none
+# Bgzip: /scratch/software-phgv2/miniconda3/envs/IPK-tritex/bin/bgzip
+# Index size: 50G
+# Batch memory: 5G
+# Novosort threads: 32
+# Parsed options:
+# Linker: GATCGATC
+# Threads: 64
+# Memory: 4G
+# Reference: /scratch/GDB136/IPK/assembly/GDB136/GDB136.p_ctg.fa
+# Temporary directory: /scratch/GDB136/tmp
+# minlen: 30
+# Input directory: /scratch/GDB136/IPK/HiC
+# Base name: /scratch/GDB136/IPK/HiC/HiC
+# BAM file: /scratch/GDB136/IPK/HiC/HiC.bam
+# Minimap error log: /scratch/GDB136/IPK/HiC/HiC_minimap.err
+# Samtools error log: /scratch/GDB136/IPK/HiC/HiC_samtools.err
+# Sort error log 1: /scratch/GDB136/IPK/HiC/HiC_samsort1.err
+# Sort error log 2: /scratch/GDB136/IPK/HiC/HiC_samsort2.err
+# Cutadapt error log: /scratch/GDB136/IPK/HiC/HiC_cutadapt.err
+# Samtools sort error log 0: /scratch/GDB136/IPK/HiC/HiC_samtools0.err
+# Read group entry: @RG\tID:/scratch/GDB136/IPK/HiC/HiC:t\tPL:ILLUMINA\tPU:/scratch/GDB136/IPK/HiC/HiC:t\tSM:/scratch/GDB136/IPK/HiC/HiC:t
+# base: /scratch/GDB136/IPK/HiC/HiC
+# Found file: /scratch/GDB136/IPK/HiC/3401768_GDB136_S3_L002_R1_001.fastq.gz
+poook/scratch/GDB136/IPK/HiC,..../scratch/GDB136/IPK/HiC/3401768_GDB136_S3_L002_R1_001.fastq.gz
+# Executing cutadapt command:
+/scratch/software-phgv2/miniconda3/envs/IPK-tritex/bin/cutadapt --interleaved -a GATCGATC -A GATCGATC -O 1 -m 30 -o trimmed_R1.fastq -p trimmed_R2.fastq <(find /scratch/GDB136/IPK/HiC | grep _R1 | grep 'f.*q.gz$' | sort | xargs zcat) <(find /scratch/GDB136/IPK/HiC | grep _R2 | grep 'f.*q.gz$' | sort | xargs zcat) 2> /scratch/GDB136/IPK/HiC/HiC_cutadapt.err
+This is cutadapt 5.1 with Python 3.12.11
+Command line parameters: --interleaved -a GATCGATC -A GATCGATC -O 1 -m 30 -o trimmed_R1.fastq -p trimmed_R2.fastq /dev/fd/63 /dev/fd/62
+Processing paired-end reads on 1 core ...
+
+=== Summary ===
+
+Total read pairs processed:        303,231,177
+  Read 1 with adapter:             192,112,600 (63.4%)
+  Read 2 with adapter:             191,782,523 (63.2%)
+
+== Read fate breakdown ==
+Pairs that were too short:          65,512,898 (21.6%)
+Pairs written (passing filters):   237,718,279 (78.4%)
+
+Total basepairs processed: 67,317,321,294 bp
+  Read 1: 33,658,660,647 bp
+  Read 2: 33,658,660,647 bp
+Total written (filtered):  43,220,738,801 bp (64.2%)
+  Read 1: 21,593,437,841 bp
+  Read 2: 21,627,300,960 bp
+
+=== First read: Adapter 1 ===
+
+Sequence: GATCGATC; Type: regular 3'; Length: 8; Trimmed: 192112600 times
+
+Minimum overlap: 1
+No. of allowed errors:
+1-8 bp: 0
+
+Bases preceding removed adapters:
+  A: 28.0%
+  C: 13.8%
+  G: 23.7%
+  T: 34.4%
+  none/other: 0.1%
+
+Overview of removed sequences
+length	count	expect	max.err	error counts
+1	34573768	75807794.2	0	34573768
+2	11712848	18951948.6	0	11712848
+3	3799960	4737987.1	0	3799960
+4	1208733	1184496.8	0	1208733
+5	1374198	296124.2	0	1374198
+6	1114962	74031.0	0	1114962
+7	1089609	18507.8	0	1089609
+8	1120782	4626.9	0	1120782
+9	1171217	4626.9	0	1171217
+10	1228510	4626.9	0	1228510
+11	1154316	4626.9	0	1154316
+12	1211433	4626.9	0	1211433
+13	1159955	4626.9	0	1159955
+14	1146915	4626.9	0	1146915
+15	1327566	4626.9	0	1327566
+16	1184158	4626.9	0	1184158
+17	1203664	4626.9	0	1203664
+18	1301002	4626.9	0	1301002
+19	1513562	4626.9	0	1513562
+20	1235064	4626.9	0	1235064
+21	1699414	4626.9	0	1699414
+22	1357647	4626.9	0	1357647
+23	1426898	4626.9	0	1426898
+24	1249095	4626.9	0	1249095
+25	1215506	4626.9	0	1215506
+26	1252891	4626.9	0	1252891
+27	1244030	4626.9	0	1244030
+28	1225549	4626.9	0	1225549
+29	1199527	4626.9	0	1199527
+30	1290914	4626.9	0	1290914
+31	1173995	4626.9	0	1173995
+32	1376657	4626.9	0	1376657
+33	1384840	4626.9	0	1384840
+34	1237057	4626.9	0	1237057
+35	1222565	4626.9	0	1222565
+36	1211362	4626.9	0	1211362
+37	1239267	4626.9	0	1239267
+38	1542377	4626.9	0	1542377
+39	1442685	4626.9	0	1442685
+40	1745898	4626.9	0	1745898
+41	1951132	4626.9	0	1951132
+42	1622399	4626.9	0	1622399
+43	1535820	4626.9	0	1535820
+44	1285159	4626.9	0	1285159
+45	1357228	4626.9	0	1357228
+46	1288551	4626.9	0	1288551
+47	1320802	4626.9	0	1320802
+48	1373295	4626.9	0	1373295
+49	1376411	4626.9	0	1376411
+50	1939011	4626.9	0	1939011
+51	1526037	4626.9	0	1526037
+52	1364920	4626.9	0	1364920
+53	1613218	4626.9	0	1613218
+54	1555889	4626.9	0	1555889
+55	1970955	4626.9	0	1970955
+56	1373187	4626.9	0	1373187
+57	1398795	4626.9	0	1398795
+58	1474582	4626.9	0	1474582
+59	1425907	4626.9	0	1425907
+60	1529730	4626.9	0	1529730
+61	1379825	4626.9	0	1379825
+62	1423973	4626.9	0	1423973
+63	1545088	4626.9	0	1545088
+64	1552098	4626.9	0	1552098
+65	1417471	4626.9	0	1417471
+66	1411419	4626.9	0	1411419
+67	1414809	4626.9	0	1414809
+68	1539481	4626.9	0	1539481
+69	1624820	4626.9	0	1624820
+70	1687007	4626.9	0	1687007
+71	1454852	4626.9	0	1454852
+72	1389971	4626.9	0	1389971
+73	1450848	4626.9	0	1450848
+74	1587386	4626.9	0	1587386
+75	1709281	4626.9	0	1709281
+76	1489656	4626.9	0	1489656
+77	1453681	4626.9	0	1453681
+78	1516247	4626.9	0	1516247
+79	1472767	4626.9	0	1472767
+80	1485413	4626.9	0	1485413
+81	1455636	4626.9	0	1455636
+82	1452905	4626.9	0	1452905
+83	1443075	4626.9	0	1443075
+84	1421643	4626.9	0	1421643
+85	1442571	4626.9	0	1442571
+86	1409218	4626.9	0	1409218
+87	1589881	4626.9	0	1589881
+88	1465418	4626.9	0	1465418
+89	1376348	4626.9	0	1376348
+90	1409856	4626.9	0	1409856
+91	1379098	4626.9	0	1379098
+92	1303917	4626.9	0	1303917
+93	1316100	4626.9	0	1316100
+94	1269091	4626.9	0	1269091
+95	1280635	4626.9	0	1280635
+96	1365295	4626.9	0	1365295
+97	1364773	4626.9	0	1364773
+98	1363862	4626.9	0	1363862
+99	1472325	4626.9	0	1472325
+100	1443746	4626.9	0	1443746
+101	1329621	4626.9	0	1329621
+102	1301419	4626.9	0	1301419
+103	1174681	4626.9	0	1174681
+104	694225	4626.9	0	694225
+105	791700	4626.9	0	791700
+106	443276	4626.9	0	443276
+107	398202	4626.9	0	398202
+108	21006	4626.9	0	21006
+109	1629	4626.9	0	1629
+110	2096	4626.9	0	2096
+111	69835	4626.9	0	69835
+
+
+=== Second read: Adapter 2 ===
+
+Sequence: GATCGATC; Type: regular 3'; Length: 8; Trimmed: 191782523 times
+
+Minimum overlap: 1
+No. of allowed errors:
+1-8 bp: 0
+
+Bases preceding removed adapters:
+  A: 27.9%
+  C: 13.8%
+  G: 24.1%
+  T: 34.2%
+  none/other: 0.0%
+
+Overview of removed sequences
+length	count	expect	max.err	error counts
+1	35051572	75807794.2	0	35051572
+2	11652711	18951948.6	0	11652711
+3	3759852	4737987.1	0	3759852
+4	1192851	1184496.8	0	1192851
+5	1354891	296124.2	0	1354891
+6	1101303	74031.0	0	1101303
+7	1072742	18507.8	0	1072742
+8	1111710	4626.9	0	1111710
+9	1162425	4626.9	0	1162425
+10	1209968	4626.9	0	1209968
+11	1138780	4626.9	0	1138780
+12	1197918	4626.9	0	1197918
+13	1150160	4626.9	0	1150160
+14	1135987	4626.9	0	1135987
+15	1313553	4626.9	0	1313553
+16	1172698	4626.9	0	1172698
+17	1189003	4626.9	0	1189003
+18	1280728	4626.9	0	1280728
+19	1504215	4626.9	0	1504215
+20	1216795	4626.9	0	1216795
+21	1694330	4626.9	0	1694330
+22	1351784	4626.9	0	1351784
+23	1411794	4626.9	0	1411794
+24	1234916	4626.9	0	1234916
+25	1200147	4626.9	0	1200147
+26	1237319	4626.9	0	1237319
+27	1228887	4626.9	0	1228887
+28	1210430	4626.9	0	1210430
+29	1183491	4626.9	0	1183491
+30	1276745	4626.9	0	1276745
+31	1160176	4626.9	0	1160176
+32	1371168	4626.9	0	1371168
+33	1372067	4626.9	0	1372067
+34	1224053	4626.9	0	1224053
+35	1210842	4626.9	0	1210842
+36	1199992	4626.9	0	1199992
+37	1220103	4626.9	0	1220103
+38	1530510	4626.9	0	1530510
+39	1427657	4626.9	0	1427657
+40	1739143	4626.9	0	1739143
+41	1944980	4626.9	0	1944980
+42	1612991	4626.9	0	1612991
+43	1527408	4626.9	0	1527408
+44	1269966	4626.9	0	1269966
+45	1347031	4626.9	0	1347031
+46	1271687	4626.9	0	1271687
+47	1311353	4626.9	0	1311353
+48	1354536	4626.9	0	1354536
+49	1365773	4626.9	0	1365773
+50	1945104	4626.9	0	1945104
+51	1515751	4626.9	0	1515751
+52	1341574	4626.9	0	1341574
+53	1599676	4626.9	0	1599676
+54	1535134	4626.9	0	1535134
+55	1971858	4626.9	0	1971858
+56	1350541	4626.9	0	1350541
+57	1383286	4626.9	0	1383286
+58	1455647	4626.9	0	1455647
+59	1404946	4626.9	0	1404946
+60	1516318	4626.9	0	1516318
+61	1363111	4626.9	0	1363111
+62	1410704	4626.9	0	1410704
+63	1532708	4626.9	0	1532708
+64	1537164	4626.9	0	1537164
+65	1412821	4626.9	0	1412821
+66	1403345	4626.9	0	1403345
+67	1407736	4626.9	0	1407736
+68	1535420	4626.9	0	1535420
+69	1614873	4626.9	0	1614873
+70	1686075	4626.9	0	1686075
+71	1447532	4626.9	0	1447532
+72	1378131	4626.9	0	1378131
+73	1436715	4626.9	0	1436715
+74	1578292	4626.9	0	1578292
+75	1701557	4626.9	0	1701557
+76	1484143	4626.9	0	1484143
+77	1446999	4626.9	0	1446999
+78	1505046	4626.9	0	1505046
+79	1468204	4626.9	0	1468204
+80	1478773	4626.9	0	1478773
+81	1442566	4626.9	0	1442566
+82	1438020	4626.9	0	1438020
+83	1432565	4626.9	0	1432565
+84	1411761	4626.9	0	1411761
+85	1433390	4626.9	0	1433390
+86	1409036	4626.9	0	1409036
+87	1584491	4626.9	0	1584491
+88	1449705	4626.9	0	1449705
+89	1362453	4626.9	0	1362453
+90	1402819	4626.9	0	1402819
+91	1406158	4626.9	0	1406158
+92	1331478	4626.9	0	1331478
+93	1340770	4626.9	0	1340770
+94	1297986	4626.9	0	1297986
+95	1306688	4626.9	0	1306688
+96	1409450	4626.9	0	1409450
+97	1406784	4626.9	0	1406784
+98	1407167	4626.9	0	1407167
+99	1477607	4626.9	0	1477607
+100	1445083	4626.9	0	1445083
+101	1333961	4626.9	0	1333961
+102	1308935	4626.9	0	1308935
+103	1180765	4626.9	0	1180765
+104	701224	4626.9	0	701224
+105	798625	4626.9	0	798625
+106	450581	4626.9	0	450581
+107	405400	4626.9	0	405400
+108	20793	4626.9	0	20793
+109	1917	4626.9	0	1917
+110	2466	4626.9	0	2466
+111	71554	4626.9	0	71554
+# Trimmed FASTQ files created: trimmed_R1.fastq, trimmed_R2.fastq
+# Executing minimap2 command:
+ -ax sr -R "@RG\tID:/scratch/GDB136/IPK/HiC/HiC:t\tPL:ILLUMINA\tPU:/scratch/GDB136/IPK/HiC/HiC:t\tSM:/scratch/GDB136/IPK/HiC/HiC:t" -t "64" -2 -I "50G" -K"5G" "/scratch/GDB136/IPK/assembly/GDB136/GDB136.p_ctg.fa" trimmed_R1.fastq trimmed_R2.fastq 2> /scratch/GDB136/IPK/HiC/HiC_minimap.err | /scratch/software-phgv2/miniconda3/envs/IPK-tritex/bin/samtools view -b -o aligned.bam
+# Aligned BAM file created: aligned.bam
+# Executing samtools commands:
+samtools fixmate -m aligned.bam fixmate.bam 2> /scratch/GDB136/IPK/HiC/HiC_samtools.err
+# Fixmate BAM file created: fixmate.bam
+# Executing samtools sort and markdup commands:
+samtools sort -m "4G" -@ "64" fixmate.bam -o sorted.bam 2> /scratch/GDB136/IPK/HiC/HiC_samsort1.err
+# Sorted BAM file created: sorted.bam
+# Executing samtools markdup command:
+samtools markdup -r sorted.bam markdup.bam 2> /scratch/GDB136/IPK/HiC/HiC_samsort2.err
+# Marked duplicates BAM file created: markdup.bam
+# Executing samtools sort by name command:
+samtools sort -@ "32" -m "4G" -n markdup.bam -o "/scratch/GDB136/IPK/HiC/HiC.bam" 2> /scratch/GDB136/IPK/HiC/HiC_samtools0.err
+# Final sorted BAM file created: /scratch/GDB136/IPK/HiC/HiC.bam
+BAM file /scratch/GDB136/IPK/HiC/HiC.bam created successfully.
+###################
+Hi-C mapping completed. Check the mapping directory: /scratch/GDB136/IPK/mapping/
