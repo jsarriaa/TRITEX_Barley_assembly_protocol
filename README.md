@@ -8,6 +8,7 @@ The TRITEX protocol is well-documented and clearly explained. However, executing
 
 In the meantime, this repository provides the scripts and Conda environments I used throughout the entire process, which may help others attempting a similar assembly.
 
+> Contact me for any doubt: jsarria@eead.csic.es or find me on [twitter](https://x.com/jsarria99)
 ______________________________________________________________________________
 
 We will refer to our barley landrace as **GDB_136**, used **MorexV3** as reference genome, and we based our work on the original TRITEX repository. However, we used modified scripts and Bash code to better follow and adapt the pipeline.
